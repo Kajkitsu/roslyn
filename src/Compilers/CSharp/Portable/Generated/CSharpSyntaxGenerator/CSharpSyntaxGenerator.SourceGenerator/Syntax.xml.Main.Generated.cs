@@ -429,6 +429,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>Called when the visitor visits a SwitchExpressionArmSyntax node.</summary>
         public virtual TResult? VisitSwitchExpressionArm(SwitchExpressionArmSyntax node) => this.DefaultVisit(node);
 
+        /// <summary>Called when the visitor visits a SwitchExpressionArraySyntax node.</summary>
+        public virtual TResult? VisitSwitchExpressionArray(SwitchExpressionArraySyntax node) => this.DefaultVisit(node);
+
         /// <summary>Called when the visitor visits a TryStatementSyntax node.</summary>
         public virtual TResult? VisitTryStatement(TryStatementSyntax node) => this.DefaultVisit(node);
 
@@ -1137,6 +1140,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>Called when the visitor visits a SwitchExpressionArmSyntax node.</summary>
         public virtual void VisitSwitchExpressionArm(SwitchExpressionArmSyntax node) => this.DefaultVisit(node);
 
+        /// <summary>Called when the visitor visits a SwitchExpressionArraySyntax node.</summary>
+        public virtual void VisitSwitchExpressionArray(SwitchExpressionArraySyntax node) => this.DefaultVisit(node);
+
         /// <summary>Called when the visitor visits a TryStatementSyntax node.</summary>
         public virtual void VisitTryStatement(TryStatementSyntax node) => this.DefaultVisit(node);
 
@@ -1844,6 +1850,9 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public override SyntaxNode? VisitSwitchExpressionArm(SwitchExpressionArmSyntax node)
             => node.Update((PatternSyntax?)Visit(node.Pattern) ?? throw new ArgumentNullException("pattern"), (WhenClauseSyntax?)Visit(node.WhenClause), VisitToken(node.EqualsGreaterThanToken), (ExpressionSyntax?)Visit(node.Expression) ?? throw new ArgumentNullException("expression"));
+
+        public override SyntaxNode? VisitSwitchExpressionArray(SwitchExpressionArraySyntax node)
+            => node.Update((ExpressionSyntax?)Visit(node.Expression) ?? throw new ArgumentNullException("expression"), VisitToken(node.QuestionColonToken), (BracketedArgumentListSyntax?)Visit(node.Labels) ?? throw new ArgumentNullException("labels"), VisitToken(node.ColonToken), (BracketedArgumentListSyntax?)Visit(node.Values) ?? throw new ArgumentNullException("values"));
 
         public override SyntaxNode? VisitTryStatement(TryStatementSyntax node)
             => node.Update(VisitList(node.AttributeLists), VisitToken(node.TryKeyword), (BlockSyntax?)Visit(node.Block) ?? throw new ArgumentNullException("block"), VisitList(node.Catches), (FinallyClauseSyntax?)Visit(node.Finally));
@@ -4483,6 +4492,25 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>Creates a new SwitchExpressionArmSyntax instance.</summary>
         public static SwitchExpressionArmSyntax SwitchExpressionArm(PatternSyntax pattern, ExpressionSyntax expression)
             => SyntaxFactory.SwitchExpressionArm(pattern, default, SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken), expression);
+
+        /// <summary>Creates a new SwitchExpressionArraySyntax instance.</summary>
+        public static SwitchExpressionArraySyntax SwitchExpressionArray(ExpressionSyntax expression, SyntaxToken questionColonToken, BracketedArgumentListSyntax labels, SyntaxToken colonToken, BracketedArgumentListSyntax values)
+        {
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            if (questionColonToken.Kind() != SyntaxKind.QuestionColonToken) throw new ArgumentException(nameof(questionColonToken));
+            if (labels == null) throw new ArgumentNullException(nameof(labels));
+            if (colonToken.Kind() != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+            if (values == null) throw new ArgumentNullException(nameof(values));
+            return (SwitchExpressionArraySyntax)Syntax.InternalSyntax.SyntaxFactory.SwitchExpressionArray((Syntax.InternalSyntax.ExpressionSyntax)expression.Green, (Syntax.InternalSyntax.SyntaxToken)questionColonToken.Node!, (Syntax.InternalSyntax.BracketedArgumentListSyntax)labels.Green, (Syntax.InternalSyntax.SyntaxToken)colonToken.Node!, (Syntax.InternalSyntax.BracketedArgumentListSyntax)values.Green).CreateRed();
+        }
+
+        /// <summary>Creates a new SwitchExpressionArraySyntax instance.</summary>
+        public static SwitchExpressionArraySyntax SwitchExpressionArray(ExpressionSyntax expression, BracketedArgumentListSyntax labels, BracketedArgumentListSyntax values)
+            => SyntaxFactory.SwitchExpressionArray(expression, SyntaxFactory.Token(SyntaxKind.QuestionColonToken), labels, SyntaxFactory.Token(SyntaxKind.ColonToken), values);
+
+        /// <summary>Creates a new SwitchExpressionArraySyntax instance.</summary>
+        public static SwitchExpressionArraySyntax SwitchExpressionArray(ExpressionSyntax expression)
+            => SyntaxFactory.SwitchExpressionArray(expression, SyntaxFactory.Token(SyntaxKind.QuestionColonToken), SyntaxFactory.BracketedArgumentList(), SyntaxFactory.Token(SyntaxKind.ColonToken), SyntaxFactory.BracketedArgumentList());
 
         /// <summary>Creates a new TryStatementSyntax instance.</summary>
         public static TryStatementSyntax TryStatement(SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally)

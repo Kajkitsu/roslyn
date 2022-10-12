@@ -2908,7 +2908,42 @@
     </Field>
     <Field Name="Expression" Type="ExpressionSyntax"/>
   </Node>
-
+  <Node Name="SwitchExpressionArraySyntax" Base="ExpressionSyntax">
+    <Kind Name="SwitchExpressionArray"/>
+    <Field Name="Expression" Type="ExpressionSyntax">
+      <PropertyComment>
+        <summary>ExpressionSyntax node representing the expression of the switch array expression.</summary>
+      </PropertyComment>
+    </Field>
+    <Field Name="QuestionColonToken" Type="SyntaxToken">
+      <Kind Name="QuestionColonToken"/>
+      <PropertyComment>
+        <summary>SyntaxToken representing the question mark.</summary>
+      </PropertyComment>
+    </Field>
+    <Field Name="Labels" Type="BracketedArgumentListSyntax">
+      <PropertyComment>
+        <summary>BracketedArgumentListSyntax node representing comma separated labels to switch on.</summary>
+      </PropertyComment>
+    </Field>
+    <Field Name="ColonToken" Type="SyntaxToken">
+      <Kind Name="ColonToken"/>
+      <PropertyComment>
+        <summary>SyntaxToken representing the colon.</summary>
+      </PropertyComment>
+    </Field>
+    <Field Name="Values" Type="BracketedArgumentListSyntax">
+      <PropertyComment>
+        <summary>BracketedArgumentListSyntax node representing the comma separated expression results.</summary>
+      </PropertyComment>
+    </Field>
+    <TypeComment>
+      <summary>Class which represents the syntax node for switch array expression.</summary>
+    </TypeComment>
+    <FactoryComment>
+      <summary>Creates a SwitchExpressionArraySyntax node.</summary>
+    </FactoryComment>
+  </Node>
   <Node Name="TryStatementSyntax" Base="StatementSyntax">
     <Kind Name="TryStatement"/>
     <Field Name="AttributeLists" Type="SyntaxList&lt;AttributeListSyntax&gt;" Override="true"/>

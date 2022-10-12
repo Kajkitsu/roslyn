@@ -18282,6 +18282,151 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         }
     }
 
+    /// <summary>Class which represents the syntax node for switch array expression.</summary>
+    internal sealed partial class SwitchExpressionArraySyntax : ExpressionSyntax
+    {
+        internal readonly ExpressionSyntax expression;
+        internal readonly SyntaxToken questionColonToken;
+        internal readonly BracketedArgumentListSyntax labels;
+        internal readonly SyntaxToken colonToken;
+        internal readonly BracketedArgumentListSyntax values;
+
+        internal SwitchExpressionArraySyntax(SyntaxKind kind, ExpressionSyntax expression, SyntaxToken questionColonToken, BracketedArgumentListSyntax labels, SyntaxToken colonToken, BracketedArgumentListSyntax values, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+          : base(kind, diagnostics, annotations)
+        {
+            this.SlotCount = 5;
+            this.AdjustFlagsAndWidth(expression);
+            this.expression = expression;
+            this.AdjustFlagsAndWidth(questionColonToken);
+            this.questionColonToken = questionColonToken;
+            this.AdjustFlagsAndWidth(labels);
+            this.labels = labels;
+            this.AdjustFlagsAndWidth(colonToken);
+            this.colonToken = colonToken;
+            this.AdjustFlagsAndWidth(values);
+            this.values = values;
+        }
+
+        internal SwitchExpressionArraySyntax(SyntaxKind kind, ExpressionSyntax expression, SyntaxToken questionColonToken, BracketedArgumentListSyntax labels, SyntaxToken colonToken, BracketedArgumentListSyntax values, SyntaxFactoryContext context)
+          : base(kind)
+        {
+            this.SetFactoryContext(context);
+            this.SlotCount = 5;
+            this.AdjustFlagsAndWidth(expression);
+            this.expression = expression;
+            this.AdjustFlagsAndWidth(questionColonToken);
+            this.questionColonToken = questionColonToken;
+            this.AdjustFlagsAndWidth(labels);
+            this.labels = labels;
+            this.AdjustFlagsAndWidth(colonToken);
+            this.colonToken = colonToken;
+            this.AdjustFlagsAndWidth(values);
+            this.values = values;
+        }
+
+        internal SwitchExpressionArraySyntax(SyntaxKind kind, ExpressionSyntax expression, SyntaxToken questionColonToken, BracketedArgumentListSyntax labels, SyntaxToken colonToken, BracketedArgumentListSyntax values)
+          : base(kind)
+        {
+            this.SlotCount = 5;
+            this.AdjustFlagsAndWidth(expression);
+            this.expression = expression;
+            this.AdjustFlagsAndWidth(questionColonToken);
+            this.questionColonToken = questionColonToken;
+            this.AdjustFlagsAndWidth(labels);
+            this.labels = labels;
+            this.AdjustFlagsAndWidth(colonToken);
+            this.colonToken = colonToken;
+            this.AdjustFlagsAndWidth(values);
+            this.values = values;
+        }
+
+        /// <summary>ExpressionSyntax node representing the expression of the switch array expression.</summary>
+        public ExpressionSyntax Expression => this.expression;
+        /// <summary>SyntaxToken representing the question mark.</summary>
+        public SyntaxToken QuestionColonToken => this.questionColonToken;
+        /// <summary>BracketedArgumentListSyntax node representing comma separated labels to switch on.</summary>
+        public BracketedArgumentListSyntax Labels => this.labels;
+        /// <summary>SyntaxToken representing the colon.</summary>
+        public SyntaxToken ColonToken => this.colonToken;
+        /// <summary>BracketedArgumentListSyntax node representing the comma separated expression results.</summary>
+        public BracketedArgumentListSyntax Values => this.values;
+
+        internal override GreenNode? GetSlot(int index)
+            => index switch
+            {
+                0 => this.expression,
+                1 => this.questionColonToken,
+                2 => this.labels,
+                3 => this.colonToken,
+                4 => this.values,
+                _ => null,
+            };
+
+        internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new CSharp.Syntax.SwitchExpressionArraySyntax(this, parent, position);
+
+        public override void Accept(CSharpSyntaxVisitor visitor) => visitor.VisitSwitchExpressionArray(this);
+        public override TResult Accept<TResult>(CSharpSyntaxVisitor<TResult> visitor) => visitor.VisitSwitchExpressionArray(this);
+
+        public SwitchExpressionArraySyntax Update(ExpressionSyntax expression, SyntaxToken questionColonToken, BracketedArgumentListSyntax labels, SyntaxToken colonToken, BracketedArgumentListSyntax values)
+        {
+            if (expression != this.Expression || questionColonToken != this.QuestionColonToken || labels != this.Labels || colonToken != this.ColonToken || values != this.Values)
+            {
+                var newNode = SyntaxFactory.SwitchExpressionArray(expression, questionColonToken, labels, colonToken, values);
+                var diags = GetDiagnostics();
+                if (diags?.Length > 0)
+                    newNode = newNode.WithDiagnosticsGreen(diags);
+                var annotations = GetAnnotations();
+                if (annotations?.Length > 0)
+                    newNode = newNode.WithAnnotationsGreen(annotations);
+                return newNode;
+            }
+
+            return this;
+        }
+
+        internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+            => new SwitchExpressionArraySyntax(this.Kind, this.expression, this.questionColonToken, this.labels, this.colonToken, this.values, diagnostics, GetAnnotations());
+
+        internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+            => new SwitchExpressionArraySyntax(this.Kind, this.expression, this.questionColonToken, this.labels, this.colonToken, this.values, GetDiagnostics(), annotations);
+
+        internal SwitchExpressionArraySyntax(ObjectReader reader)
+          : base(reader)
+        {
+            this.SlotCount = 5;
+            var expression = (ExpressionSyntax)reader.ReadValue();
+            AdjustFlagsAndWidth(expression);
+            this.expression = expression;
+            var questionColonToken = (SyntaxToken)reader.ReadValue();
+            AdjustFlagsAndWidth(questionColonToken);
+            this.questionColonToken = questionColonToken;
+            var labels = (BracketedArgumentListSyntax)reader.ReadValue();
+            AdjustFlagsAndWidth(labels);
+            this.labels = labels;
+            var colonToken = (SyntaxToken)reader.ReadValue();
+            AdjustFlagsAndWidth(colonToken);
+            this.colonToken = colonToken;
+            var values = (BracketedArgumentListSyntax)reader.ReadValue();
+            AdjustFlagsAndWidth(values);
+            this.values = values;
+        }
+
+        internal override void WriteTo(ObjectWriter writer)
+        {
+            base.WriteTo(writer);
+            writer.WriteValue(this.expression);
+            writer.WriteValue(this.questionColonToken);
+            writer.WriteValue(this.labels);
+            writer.WriteValue(this.colonToken);
+            writer.WriteValue(this.values);
+        }
+
+        static SwitchExpressionArraySyntax()
+        {
+            ObjectBinder.RegisterTypeReader(typeof(SwitchExpressionArraySyntax), r => new SwitchExpressionArraySyntax(r));
+        }
+    }
+
     internal sealed partial class TryStatementSyntax : StatementSyntax
     {
         internal readonly GreenNode? attributeLists;
@@ -34017,6 +34162,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         public virtual TResult VisitDefaultSwitchLabel(DefaultSwitchLabelSyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitSwitchExpression(SwitchExpressionSyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitSwitchExpressionArm(SwitchExpressionArmSyntax node) => this.DefaultVisit(node);
+        public virtual TResult VisitSwitchExpressionArray(SwitchExpressionArraySyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitTryStatement(TryStatementSyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitCatchClause(CatchClauseSyntax node) => this.DefaultVisit(node);
         public virtual TResult VisitCatchDeclaration(CatchDeclarationSyntax node) => this.DefaultVisit(node);
@@ -34256,6 +34402,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         public virtual void VisitDefaultSwitchLabel(DefaultSwitchLabelSyntax node) => this.DefaultVisit(node);
         public virtual void VisitSwitchExpression(SwitchExpressionSyntax node) => this.DefaultVisit(node);
         public virtual void VisitSwitchExpressionArm(SwitchExpressionArmSyntax node) => this.DefaultVisit(node);
+        public virtual void VisitSwitchExpressionArray(SwitchExpressionArraySyntax node) => this.DefaultVisit(node);
         public virtual void VisitTryStatement(TryStatementSyntax node) => this.DefaultVisit(node);
         public virtual void VisitCatchClause(CatchClauseSyntax node) => this.DefaultVisit(node);
         public virtual void VisitCatchDeclaration(CatchDeclarationSyntax node) => this.DefaultVisit(node);
@@ -34770,6 +34917,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
         public override CSharpSyntaxNode VisitSwitchExpressionArm(SwitchExpressionArmSyntax node)
             => node.Update((PatternSyntax)Visit(node.Pattern), (WhenClauseSyntax)Visit(node.WhenClause), (SyntaxToken)Visit(node.EqualsGreaterThanToken), (ExpressionSyntax)Visit(node.Expression));
+
+        public override CSharpSyntaxNode VisitSwitchExpressionArray(SwitchExpressionArraySyntax node)
+            => node.Update((ExpressionSyntax)Visit(node.Expression), (SyntaxToken)Visit(node.QuestionColonToken), (BracketedArgumentListSyntax)Visit(node.Labels), (SyntaxToken)Visit(node.ColonToken), (BracketedArgumentListSyntax)Visit(node.Values));
 
         public override CSharpSyntaxNode VisitTryStatement(TryStatementSyntax node)
             => node.Update(VisitList(node.AttributeLists), (SyntaxToken)Visit(node.TryKeyword), (BlockSyntax)Visit(node.Block), VisitList(node.Catches), (FinallyClauseSyntax)Visit(node.Finally));
@@ -38037,6 +38187,21 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 #endif
 
             return new SwitchExpressionArmSyntax(SyntaxKind.SwitchExpressionArm, pattern, whenClause, equalsGreaterThanToken, expression, this.context);
+        }
+
+        public SwitchExpressionArraySyntax SwitchExpressionArray(ExpressionSyntax expression, SyntaxToken questionColonToken, BracketedArgumentListSyntax labels, SyntaxToken colonToken, BracketedArgumentListSyntax values)
+        {
+#if DEBUG
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            if (questionColonToken == null) throw new ArgumentNullException(nameof(questionColonToken));
+            if (questionColonToken.Kind != SyntaxKind.QuestionColonToken) throw new ArgumentException(nameof(questionColonToken));
+            if (labels == null) throw new ArgumentNullException(nameof(labels));
+            if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+            if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+            if (values == null) throw new ArgumentNullException(nameof(values));
+#endif
+
+            return new SwitchExpressionArraySyntax(SyntaxKind.SwitchExpressionArray, expression, questionColonToken, labels, colonToken, values, this.context);
         }
 
         public TryStatementSyntax TryStatement(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally)
@@ -43012,6 +43177,21 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             return new SwitchExpressionArmSyntax(SyntaxKind.SwitchExpressionArm, pattern, whenClause, equalsGreaterThanToken, expression);
         }
 
+        public static SwitchExpressionArraySyntax SwitchExpressionArray(ExpressionSyntax expression, SyntaxToken questionColonToken, BracketedArgumentListSyntax labels, SyntaxToken colonToken, BracketedArgumentListSyntax values)
+        {
+#if DEBUG
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            if (questionColonToken == null) throw new ArgumentNullException(nameof(questionColonToken));
+            if (questionColonToken.Kind != SyntaxKind.QuestionColonToken) throw new ArgumentException(nameof(questionColonToken));
+            if (labels == null) throw new ArgumentNullException(nameof(labels));
+            if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+            if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+            if (values == null) throw new ArgumentNullException(nameof(values));
+#endif
+
+            return new SwitchExpressionArraySyntax(SyntaxKind.SwitchExpressionArray, expression, questionColonToken, labels, colonToken, values);
+        }
+
         public static TryStatementSyntax TryStatement(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<AttributeListSyntax> attributeLists, SyntaxToken tryKeyword, BlockSyntax block, Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<CatchClauseSyntax> catches, FinallyClauseSyntax? @finally)
         {
 #if DEBUG
@@ -45154,6 +45334,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 typeof(DefaultSwitchLabelSyntax),
                 typeof(SwitchExpressionSyntax),
                 typeof(SwitchExpressionArmSyntax),
+                typeof(SwitchExpressionArraySyntax),
                 typeof(TryStatementSyntax),
                 typeof(CatchClauseSyntax),
                 typeof(CatchDeclarationSyntax),

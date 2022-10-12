@@ -8600,6 +8600,82 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax
         public SwitchExpressionArmSyntax WithExpression(ExpressionSyntax expression) => Update(this.Pattern, this.WhenClause, this.EqualsGreaterThanToken, expression);
     }
 
+    /// <summary>Class which represents the syntax node for switch array expression.</summary>
+    /// <remarks>
+    /// <para>This node is associated with the following syntax kinds:</para>
+    /// <list type="bullet">
+    /// <item><description><see cref="SyntaxKind.SwitchExpressionArray"/></description></item>
+    /// </list>
+    /// </remarks>
+    public sealed partial class SwitchExpressionArraySyntax : ExpressionSyntax
+    {
+        private ExpressionSyntax? expression;
+        private BracketedArgumentListSyntax? labels;
+        private BracketedArgumentListSyntax? values;
+
+        internal SwitchExpressionArraySyntax(InternalSyntax.CSharpSyntaxNode green, SyntaxNode? parent, int position)
+          : base(green, parent, position)
+        {
+        }
+
+        /// <summary>ExpressionSyntax node representing the expression of the switch array expression.</summary>
+        public ExpressionSyntax Expression => GetRedAtZero(ref this.expression)!;
+
+        /// <summary>SyntaxToken representing the question mark.</summary>
+        public SyntaxToken QuestionColonToken => new SyntaxToken(this, ((Syntax.InternalSyntax.SwitchExpressionArraySyntax)this.Green).questionColonToken, GetChildPosition(1), GetChildIndex(1));
+
+        /// <summary>BracketedArgumentListSyntax node representing comma separated labels to switch on.</summary>
+        public BracketedArgumentListSyntax Labels => GetRed(ref this.labels, 2)!;
+
+        /// <summary>SyntaxToken representing the colon.</summary>
+        public SyntaxToken ColonToken => new SyntaxToken(this, ((Syntax.InternalSyntax.SwitchExpressionArraySyntax)this.Green).colonToken, GetChildPosition(3), GetChildIndex(3));
+
+        /// <summary>BracketedArgumentListSyntax node representing the comma separated expression results.</summary>
+        public BracketedArgumentListSyntax Values => GetRed(ref this.values, 4)!;
+
+        internal override SyntaxNode? GetNodeSlot(int index)
+            => index switch
+            {
+                0 => GetRedAtZero(ref this.expression)!,
+                2 => GetRed(ref this.labels, 2)!,
+                4 => GetRed(ref this.values, 4)!,
+                _ => null,
+            };
+
+        internal override SyntaxNode? GetCachedSlot(int index)
+            => index switch
+            {
+                0 => this.expression,
+                2 => this.labels,
+                4 => this.values,
+                _ => null,
+            };
+
+        public override void Accept(CSharpSyntaxVisitor visitor) => visitor.VisitSwitchExpressionArray(this);
+        public override TResult? Accept<TResult>(CSharpSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitSwitchExpressionArray(this);
+
+        public SwitchExpressionArraySyntax Update(ExpressionSyntax expression, SyntaxToken questionColonToken, BracketedArgumentListSyntax labels, SyntaxToken colonToken, BracketedArgumentListSyntax values)
+        {
+            if (expression != this.Expression || questionColonToken != this.QuestionColonToken || labels != this.Labels || colonToken != this.ColonToken || values != this.Values)
+            {
+                var newNode = SyntaxFactory.SwitchExpressionArray(expression, questionColonToken, labels, colonToken, values);
+                var annotations = GetAnnotations();
+                return annotations?.Length > 0 ? newNode.WithAnnotations(annotations) : newNode;
+            }
+
+            return this;
+        }
+
+        public SwitchExpressionArraySyntax WithExpression(ExpressionSyntax expression) => Update(expression, this.QuestionColonToken, this.Labels, this.ColonToken, this.Values);
+        public SwitchExpressionArraySyntax WithQuestionColonToken(SyntaxToken questionColonToken) => Update(this.Expression, questionColonToken, this.Labels, this.ColonToken, this.Values);
+        public SwitchExpressionArraySyntax WithLabels(BracketedArgumentListSyntax labels) => Update(this.Expression, this.QuestionColonToken, labels, this.ColonToken, this.Values);
+        public SwitchExpressionArraySyntax WithColonToken(SyntaxToken colonToken) => Update(this.Expression, this.QuestionColonToken, this.Labels, colonToken, this.Values);
+        public SwitchExpressionArraySyntax WithValues(BracketedArgumentListSyntax values) => Update(this.Expression, this.QuestionColonToken, this.Labels, this.ColonToken, values);
+
+        public SwitchExpressionArraySyntax AddLabelsArguments(params ArgumentSyntax[] items) => WithLabels(this.Labels.WithArguments(this.Labels.Arguments.AddRange(items)));
+        public SwitchExpressionArraySyntax AddValuesArguments(params ArgumentSyntax[] items) => WithValues(this.Values.WithArguments(this.Values.Arguments.AddRange(items)));
+    }
+
     /// <remarks>
     /// <para>This node is associated with the following syntax kinds:</para>
     /// <list type="bullet">
