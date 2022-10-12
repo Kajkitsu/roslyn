@@ -60,6 +60,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         NullCoalescingAssignmentOperator,
         UnconvertedConditionalOperator,
         ConditionalOperator,
+        SwitchOperator,
         ArrayAccess,
         ArrayLength,
         AwaitableInfo,
@@ -1808,6 +1809,45 @@ namespace Microsoft.CodeAnalysis.CSharp
             if (isRef != this.IsRef || condition != this.Condition || consequence != this.Consequence || alternative != this.Alternative || constantValueOpt != this.ConstantValueOpt || !TypeSymbol.Equals(naturalTypeOpt, this.NaturalTypeOpt, TypeCompareKind.ConsiderEverything) || wasTargetTyped != this.WasTargetTyped || !TypeSymbol.Equals(type, this.Type, TypeCompareKind.ConsiderEverything))
             {
                 var result = new BoundConditionalOperator(this.Syntax, isRef, condition, consequence, alternative, constantValueOpt, naturalTypeOpt, wasTargetTyped, type, this.HasErrors);
+                result.CopyAttributes(this);
+                return result;
+            }
+            return this;
+        }
+    }
+
+    internal sealed partial class BoundSwitchOperator : BoundExpression
+    {
+        public BoundSwitchOperator(SyntaxNode syntax, BoundExpression expression, ImmutableArray<BoundExpression> labels, ImmutableArray<BoundExpression> values, TypeSymbol type, bool hasErrors = false)
+            : base(BoundKind.SwitchOperator, syntax, type, hasErrors || expression.HasErrors() || labels.HasErrors() || values.HasErrors())
+        {
+
+            RoslynDebug.Assert(expression is object, "Field 'expression' cannot be null (make the type nullable in BoundNodes.xml to remove this check)");
+            RoslynDebug.Assert(!labels.IsDefault, "Field 'labels' cannot be null (use Null=\"allow\" in BoundNodes.xml to remove this check)");
+            RoslynDebug.Assert(!values.IsDefault, "Field 'values' cannot be null (use Null=\"allow\" in BoundNodes.xml to remove this check)");
+            RoslynDebug.Assert(type is object, "Field 'type' cannot be null (make the type nullable in BoundNodes.xml to remove this check)");
+
+            this.Expression = expression;
+            this.Labels = labels;
+            this.Values = values;
+        }
+
+
+        public new TypeSymbol Type => base.Type!;
+
+        public BoundExpression Expression { get; }
+
+        public ImmutableArray<BoundExpression> Labels { get; }
+
+        public ImmutableArray<BoundExpression> Values { get; }
+        [DebuggerStepThrough]
+        public override BoundNode? Accept(BoundTreeVisitor visitor) => visitor.VisitSwitchOperator(this);
+
+        public BoundSwitchOperator Update(BoundExpression expression, ImmutableArray<BoundExpression> labels, ImmutableArray<BoundExpression> values, TypeSymbol type)
+        {
+            if (expression != this.Expression || labels != this.Labels || values != this.Values || !TypeSymbol.Equals(type, this.Type, TypeCompareKind.ConsiderEverything))
+            {
+                var result = new BoundSwitchOperator(this.Syntax, expression, labels, values, type, this.HasErrors);
                 result.CopyAttributes(this);
                 return result;
             }
@@ -8256,6 +8296,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return VisitUnconvertedConditionalOperator((BoundUnconvertedConditionalOperator)node, arg);
                 case BoundKind.ConditionalOperator:
                     return VisitConditionalOperator((BoundConditionalOperator)node, arg);
+                case BoundKind.SwitchOperator:
+                    return VisitSwitchOperator((BoundSwitchOperator)node, arg);
                 case BoundKind.ArrayAccess:
                     return VisitArrayAccess((BoundArrayAccess)node, arg);
                 case BoundKind.ArrayLength:
@@ -8636,6 +8678,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         public virtual R VisitNullCoalescingAssignmentOperator(BoundNullCoalescingAssignmentOperator node, A arg) => this.DefaultVisit(node, arg);
         public virtual R VisitUnconvertedConditionalOperator(BoundUnconvertedConditionalOperator node, A arg) => this.DefaultVisit(node, arg);
         public virtual R VisitConditionalOperator(BoundConditionalOperator node, A arg) => this.DefaultVisit(node, arg);
+        public virtual R VisitSwitchOperator(BoundSwitchOperator node, A arg) => this.DefaultVisit(node, arg);
         public virtual R VisitArrayAccess(BoundArrayAccess node, A arg) => this.DefaultVisit(node, arg);
         public virtual R VisitArrayLength(BoundArrayLength node, A arg) => this.DefaultVisit(node, arg);
         public virtual R VisitAwaitableInfo(BoundAwaitableInfo node, A arg) => this.DefaultVisit(node, arg);
@@ -8846,6 +8889,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         public virtual BoundNode? VisitNullCoalescingAssignmentOperator(BoundNullCoalescingAssignmentOperator node) => this.DefaultVisit(node);
         public virtual BoundNode? VisitUnconvertedConditionalOperator(BoundUnconvertedConditionalOperator node) => this.DefaultVisit(node);
         public virtual BoundNode? VisitConditionalOperator(BoundConditionalOperator node) => this.DefaultVisit(node);
+        public virtual BoundNode? VisitSwitchOperator(BoundSwitchOperator node) => this.DefaultVisit(node);
         public virtual BoundNode? VisitArrayAccess(BoundArrayAccess node) => this.DefaultVisit(node);
         public virtual BoundNode? VisitArrayLength(BoundArrayLength node) => this.DefaultVisit(node);
         public virtual BoundNode? VisitAwaitableInfo(BoundAwaitableInfo node) => this.DefaultVisit(node);
@@ -9194,6 +9238,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             this.Visit(node.Condition);
             this.Visit(node.Consequence);
             this.Visit(node.Alternative);
+            return null;
+        }
+        public override BoundNode? VisitSwitchOperator(BoundSwitchOperator node)
+        {
+            this.Visit(node.Expression);
+            this.VisitList(node.Labels);
+            this.VisitList(node.Values);
             return null;
         }
         public override BoundNode? VisitArrayAccess(BoundArrayAccess node)
@@ -10197,6 +10248,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             TypeSymbol? naturalTypeOpt = this.VisitType(node.NaturalTypeOpt);
             TypeSymbol? type = this.VisitType(node.Type);
             return node.Update(node.IsRef, condition, consequence, alternative, node.ConstantValueOpt, naturalTypeOpt, node.WasTargetTyped, type);
+        }
+        public override BoundNode? VisitSwitchOperator(BoundSwitchOperator node)
+        {
+            BoundExpression expression = (BoundExpression)this.Visit(node.Expression);
+            ImmutableArray<BoundExpression> labels = this.VisitList(node.Labels);
+            ImmutableArray<BoundExpression> values = this.VisitList(node.Values);
+            TypeSymbol? type = this.VisitType(node.Type);
+            return node.Update(expression, labels, values, type);
         }
         public override BoundNode? VisitArrayAccess(BoundArrayAccess node)
         {
@@ -11741,6 +11800,25 @@ namespace Microsoft.CodeAnalysis.CSharp
             else
             {
                 updatedNode = node.Update(node.IsRef, condition, consequence, alternative, node.ConstantValueOpt, naturalTypeOpt, node.WasTargetTyped, node.Type);
+            }
+            return updatedNode;
+        }
+
+        public override BoundNode? VisitSwitchOperator(BoundSwitchOperator node)
+        {
+            BoundExpression expression = (BoundExpression)this.Visit(node.Expression);
+            ImmutableArray<BoundExpression> labels = this.VisitList(node.Labels);
+            ImmutableArray<BoundExpression> values = this.VisitList(node.Values);
+            BoundSwitchOperator updatedNode;
+
+            if (_updatedNullabilities.TryGetValue(node, out (NullabilityInfo Info, TypeSymbol? Type) infoAndType))
+            {
+                updatedNode = node.Update(expression, labels, values, infoAndType.Type!);
+                updatedNode.TopLevelNullability = infoAndType.Info;
+            }
+            else
+            {
+                updatedNode = node.Update(expression, labels, values, node.Type);
             }
             return updatedNode;
         }
@@ -13978,6 +14056,16 @@ namespace Microsoft.CodeAnalysis.CSharp
             new TreeDumperNode("constantValueOpt", node.ConstantValueOpt, null),
             new TreeDumperNode("naturalTypeOpt", node.NaturalTypeOpt, null),
             new TreeDumperNode("wasTargetTyped", node.WasTargetTyped, null),
+            new TreeDumperNode("type", node.Type, null),
+            new TreeDumperNode("isSuppressed", node.IsSuppressed, null),
+            new TreeDumperNode("hasErrors", node.HasErrors, null)
+        }
+        );
+        public override TreeDumperNode VisitSwitchOperator(BoundSwitchOperator node, object? arg) => new TreeDumperNode("switchOperator", null, new TreeDumperNode[]
+        {
+            new TreeDumperNode("expression", null, new TreeDumperNode[] { Visit(node.Expression, null) }),
+            new TreeDumperNode("labels", null, from x in node.Labels select Visit(x, null)),
+            new TreeDumperNode("values", null, from x in node.Values select Visit(x, null)),
             new TreeDumperNode("type", node.Type, null),
             new TreeDumperNode("isSuppressed", node.IsSuppressed, null),
             new TreeDumperNode("hasErrors", node.HasErrors, null)

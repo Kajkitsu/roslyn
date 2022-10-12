@@ -739,6 +739,7 @@ expression
   | size_of_expression
   | stack_alloc_array_creation_expression
   | switch_expression
+  | switch_expression_array
   | throw_expression
   | tuple_expression
   | type
@@ -1039,6 +1040,10 @@ switch_expression
 
 switch_expression_arm
   : pattern when_clause? '=>' expression
+  ;
+
+switch_expression_array
+  : expression '?:' bracketed_argument_list ':' bracketed_argument_list
   ;
 
 throw_expression
