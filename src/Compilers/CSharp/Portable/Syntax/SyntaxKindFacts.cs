@@ -1330,6 +1330,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return "<?";
                 case SyntaxKind.XmlProcessingInstructionEndToken:
                     return "?>";
+                case SyntaxKind.QuestionColonToken:
+                    return "?:";
 
                 // compound
                 case SyntaxKind.BarBarToken:

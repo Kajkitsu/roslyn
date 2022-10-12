@@ -10227,6 +10227,7 @@ tryAgain:
                     return Precedence.Relational;
                 case SyntaxKind.SwitchExpression:
                 case SyntaxKind.WithExpression:
+                case SyntaxKind.SwitchExpressionArray:
                     return Precedence.Switch;
                 case SyntaxKind.LeftShiftExpression:
                 case SyntaxKind.RightShiftExpression:
@@ -10670,6 +10671,15 @@ tryAgain:
                     leftOperand = _syntaxFactory.ConditionalExpression(leftOperand, questionToken, colonLeft, colon, colonRight);
                 }
             }
+            if (CurrentToken.Kind == SyntaxKind.QuestionColonToken)
+            {
+                var questionColonToken = this.EatToken();
+                var labels = this.ParseBracketedArgumentList();
+                var colon = this.EatToken(SyntaxKind.ColonToken);
+                var values = this.ParseBracketedArgumentList();
+                leftOperand = _syntaxFactory.SwitchExpressionArray(leftOperand, questionColonToken, labels, colon, values);
+            }
+
 
             return leftOperand;
         }
@@ -11950,6 +11960,7 @@ tryAgain:
                 case SyntaxKind.SwitchKeyword:
                 case SyntaxKind.EqualsGreaterThanToken:
                 case SyntaxKind.DotDotToken:
+                case SyntaxKind.QuestionColonToken:
                     return false;
                 default:
                     return true;

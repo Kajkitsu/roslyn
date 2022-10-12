@@ -604,6 +604,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                             info.Kind = SyntaxKind.QuestionQuestionToken;
                         }
                     }
+                    else if (TextWindow.PeekChar() == ':')
+                    {
+                        TextWindow.AdvanceChar();
+                        info.Kind = SyntaxKind.QuestionColonToken;
+                    }
                     else
                     {
                         info.Kind = SyntaxKind.QuestionToken;

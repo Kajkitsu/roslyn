@@ -143,7 +143,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         PercentEqualsToken = 8283,
         /// <summary>Represents <c>??=</c> token.</summary>
         QuestionQuestionEqualsToken = 8284,
-        /// <summary>Represents <c>?:=</c> token.</summary>
+        /// <summary>Represents <c>?:</c> token.</summary>
         QuestionColonToken = 8285,
 
         // Keywords

@@ -3,6 +3,9 @@
     "Visual Studio Extension": {
       "executablePath": "$(DevEnvDir)devenv.exe",
       "commandLineArgs": "/rootsuffix $(VSSDKTargetPlatformRegRootSuffix) /log"
+    },
+    "Profile 1": {
+      "commandName": "Project"
     }
   }
 }
