@@ -660,6 +660,9 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 case SyntaxKind.ConditionalExpression:
                     return BindConditionalOperator((ConditionalExpressionSyntax)node, diagnostics);
+                
+                case SyntaxKind.SwitchExpressionArray:
+                    return BindSwitchOperator((SwitchExpressionArraySyntax)node, diagnostics);
 
                 case SyntaxKind.SwitchExpression:
                     return BindSwitchExpression((SwitchExpressionSyntax)node, diagnostics);

@@ -4138,6 +4138,37 @@ namespace Microsoft.CodeAnalysis.CSharp
             return new BoundConditionalOperator(node, isRef: true, condition, trueExpr, falseExpr, constantValueOpt: null, type, wasTargetTyped: false, type, hasErrors);
         }
 
+        private BoundSwitchOperator BindSwitchOperator(SwitchExpressionArraySyntax node, BindingDiagnosticBag diagnostics)
+        {
+            BoundExpression switchExpr = BindValue(node.Expression, diagnostics, BindValueKind.RValue);
+            ImmutableArray<BoundExpression> labelsExpr = BindSwitchOperatorArguments(node.Labels, diagnostics);
+            ImmutableArray<BoundExpression> valuesExpr = BindSwitchOperatorArguments(node.Values, diagnostics);
+
+            // TODO: Add semantic validation for arguments and diagnostics.
+            TypeSymbol type = valuesExpr.Length > 1 ? valuesExpr[0].Type : CreateErrorType();
+            bool hasErrors = type.IsErrorType();
+
+            return new BoundSwitchOperator(node, switchExpr, labelsExpr, valuesExpr, type, hasErrors);
+        }
+
+        private ImmutableArray<BoundExpression> BindSwitchOperatorArguments(BracketedArgumentListSyntax node, DiagnosticBag diagnostics)
+        {
+            AnalyzedArguments analyzedArguments = AnalyzedArguments.GetInstance();
+            ImmutableArray<BoundExpression> arguments;
+            try
+            {
+                BindArgumentsAndNames(node, diagnostics, analyzedArguments);
+                arguments = BuildArgumentsForErrorRecovery(analyzedArguments);
+            }
+            finally
+            {
+                analyzedArguments.Free();
+            }
+
+            return arguments;
+        }
+
+
         /// <summary>
         /// Constant folding for conditional (aka ternary) operators.
         /// </summary>
