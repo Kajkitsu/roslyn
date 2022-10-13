@@ -46,12 +46,38 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             var label = rewrittenLabels[0];
             var consequence = rewrittenValues[0];
-        // public BoundBinaryOperator(SyntaxNode syntax, BinaryOperatorKind operatorKind, BoundBinaryOperator.UncommonData? data, LookupResultKind resultKind, BoundExpression left, BoundExpression right, TypeSymbol type, bool hasErrors = false)
-            var condition = new BoundBinaryOperator(label.Syntax, BinaryOperatorKind.Equal, rewrittenExpression, label, null, null, LookupResultKind.Viable, booleanType);
+        // // public BoundBinaryOperator(SyntaxNode syntax, BinaryOperatorKind operatorKind, BoundBinaryOperator.UncommonData? data, LookupResultKind resultKind, BoundExpression left, BoundExpression right, TypeSymbol type, bool hasErrors = false)
+        // SyntaxNode syntax,
+        //     BinaryOperatorKind operatorKind,
+        // BoundExpression left,
+        //     BoundExpression right,
+        // ConstantValue? constantValueOpt,
+        //     MethodSymbol? methodOpt,
+        // TypeSymbol? constrainedToTypeOpt,
+        //     LookupResultKind resultKind,
+        // ImmutableArray<MethodSymbol> originalUserDefinedOperatorsOpt,
+        //     TypeSymbol type,
+        
+        var condition = new BoundBinaryOperator(
+                label.Syntax, 
+                BinaryOperatorKind.Equal,
+                null, 
+                LookupResultKind.Viable,
+                rewrittenExpression, 
+                label, 
+                booleanType);
             BoundExpression alternative = rewrittenLabels.Length > 1 ?
                 RewriteSwitchOperator(syntax, rewrittenExpression, rewrittenLabels.RemoveAt(0), rewrittenValues.RemoveAt(0), rewrittenType, booleanType) :
                 rewrittenValues[1];
-            return new BoundConditionalOperator(label.Syntax, condition, consequence, alternative, null, rewrittenType);
+            return new BoundConditionalOperator(label.Syntax,
+                false,
+                condition,
+                consequence,
+                alternative,
+                rewrittenExpression.ConstantValue, 
+                rewrittenType, //TODO or change with booleanType 
+                false,
+                booleanType); //TODO or change with rewrittenType 
         }
     }
 }
